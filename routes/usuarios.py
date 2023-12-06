@@ -77,3 +77,15 @@ async def actualizar_usuario(id: str, usuario: Usuario):
     except: 
         raise HTTPException(500, "No se actualizo nada")
     return " Datos de usuario actualizado !!!!"
+
+@usuario.put("/{id}/chpass", response_model=str, status_code=202)
+async def actualizar_clave_usuario(id: str, clave: str):
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(406, "Id inválido")
+    try:
+        await actualiza_pass_usuario(ObjectId(id),clave)
+    except: 
+        raise HTTPException(500, "No se actualizo nada")
+    return " Datos de usuario actualizado !!!!"

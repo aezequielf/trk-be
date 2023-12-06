@@ -53,7 +53,11 @@ async def actualiza_pass_usuario(id: ObjectId, clave: str):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": {"clave" : clave}})
     return rta
 
+# Actualizar datos de usuario para agregar datos de guía.
 
+async def actualiza_usuario_aguia(id: ObjectId, usuario: Usuario):
+    rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(usuario)})
+    return rta
 
 # crud recorridos/ travesías
 
