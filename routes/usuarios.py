@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from schemas.usuarioSchema import usuarioSchema, usuariosSchema
-from models.usuarios import Usuario, Usuario_Login
+from models.usuarios import Usuario, Usuario_Login, Clave
 from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario, actualiza_pass_usuario
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -79,7 +79,8 @@ async def actualizar_usuario(id: str, usuario: Usuario):
     return " Datos de usuario actualizado !!!!"
 
 @usuario.put("/{id}/chpass", response_model=str, status_code=202)
-async def actualizar_clave_usuario(id: str, clave: str):
+async def actualizar_clave_usuario(id: str, clave: Clave):
+    clave = clave.model_dump()
     try:
         ObjectId(id).is_valid
     except:
@@ -89,3 +90,4 @@ async def actualizar_clave_usuario(id: str, clave: str):
     except: 
         raise HTTPException(500, "No se actualizo nada")
     return " Datos de usuario actualizado !!!!"
+

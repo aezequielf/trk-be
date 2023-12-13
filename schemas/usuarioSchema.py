@@ -10,3 +10,4 @@ def usuarioSchema(usuario) -> dict:
 
 def usuariosSchema(usuarios) -> list:
     return [usuarioSchema(usuario) for usuario in usuarios]
+

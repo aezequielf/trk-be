@@ -1,12 +1,14 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
 from models.pcias import Pcia
-from models.usuarios import Usuario, Usuario_Login
+from models.usuarios import Usuario, Usuario_Login,Clave, Guia
+from models.opiniones import Opinion
 
 cnx_motor = AsyncIOMotorClient('localhost',27017)
 
 c_pcias = cnx_motor.tpdb.pcias
 c_usuarios = cnx_motor.tpdb.usuarios
+c_opiniones = cnx_motor.tpdb.opiniones
 
 # crud provincias
 async def crea_prov(pcia: Pcia):
@@ -49,14 +51,20 @@ async def actualiza_usuario(id: ObjectId, usuario: Usuario):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(usuario)})
     return rta
 
-async def actualiza_pass_usuario(id: ObjectId, clave: str):
-    rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": {"clave" : clave}})
+async def actualiza_pass_usuario(id: ObjectId, clave: Clave):
+    rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": clave})
     return rta
 
 # Actualizar datos de usuario para agregar datos de guía.
 
 async def actualiza_usuario_aguia(id: ObjectId, usuario: Usuario):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(usuario)})
+    return rta
+
+# Actualizar opiniones de usuario para guías.
+
+async def nueva_opinion_guia(id: ObjectId, opinion: Opinion):
+    rta = await c_opiniones.insert_one(opinion)
     return rta
 
 # crud recorridos/ travesías

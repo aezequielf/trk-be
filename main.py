@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.pcias import pcia
 from routes.usuarios import usuario
+from routes.opiniones import opinion
 
 
 origenes = ["http://localhost:4200","http://127.0.0.1:4200"]
@@ -17,5 +18,6 @@ app.add_middleware(
 
 app.include_router(pcia,prefix="/pcias")
 app.include_router(usuario,prefix="/usuarios")
+app.include_router(opinion,prefix="/opina")
 
 

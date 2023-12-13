@@ -10,3 +10,12 @@ class Usuario(BaseModel):
 
 class Usuario_Login(Usuario):
     clave : str
+
+class Clave(BaseModel):
+    clave: str
+
+class Guia(BaseModel):
+    esguia : Optional[bool] = None
+    empresa: str
+    matricula: str
+
