@@ -3,12 +3,14 @@ from bson.objectid import ObjectId
 from models.pcias import Pcia
 from models.usuarios import Usuario, Usuario_Login,Clave, Guia
 from models.opiniones import Opinion
+from models.destinos import Destino, DetallesDestino
 
 cnx_motor = AsyncIOMotorClient('localhost',27017)
 
 c_pcias = cnx_motor.tpdb.pcias
 c_usuarios = cnx_motor.tpdb.usuarios
 c_opiniones = cnx_motor.tpdb.opiniones
+c_destinos = cnx_motor.tpdb.destinos
 
 # crud provincias
 async def crea_prov(pcia: Pcia):
@@ -51,11 +53,11 @@ async def actualiza_usuario(id: ObjectId, usuario: Usuario):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(usuario)})
     return rta
 
+# Actualizar datos de usuario para agregar datos de guía.
+
 async def actualiza_pass_usuario(id: ObjectId, clave: Clave):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": clave})
     return rta
-
-# Actualizar datos de usuario para agregar datos de guía.
 
 async def actualiza_usuario_aguia(id: ObjectId, usuario: Usuario):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(usuario)})
@@ -69,3 +71,15 @@ async def nueva_opinion_guia(id: ObjectId, opinion: Opinion):
 
 # crud recorridos/ travesías
 
+async def nuevo_destino(destino : Destino):
+    rta = await c_destinos.insert_one(destino)
+    return rta.inserted_id
+
+async def lista_destinos():
+    cursor = c_destinos.find({})
+    l_destinos = [un_destino async for un_destino in cursor]
+    return l_destinos
+
+# async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
+#     rta = await c_destinos.find_one_and_update({"$push"{ "detalles" : detalle}}})
+#     return rta
