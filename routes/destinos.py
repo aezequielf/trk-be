@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas.destinoSchema import destinoSchema, destinosSchema
 from models.destinos import Destino, DetallesDestino
-from db.mongo import nuevo_destino, lista_destinos
+from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
@@ -16,8 +16,14 @@ async def agrega_destino( destino : Destino):
 
 @destino.get('/')
 async def listado_destinos():
-    print('aca ')
     return destinosSchema( await lista_destinos())
+
+@destino.get('/pcia/{id}')
+async def listado_destinos_pcias(id: str):
+    try:
+        return destinosSchema( await lista_destinos_pcia(id))
+    except:
+        return []
 
 # @destino.put('/{id}')
 # async def detalle_destino(id : str, detalle: DetallesDestino):

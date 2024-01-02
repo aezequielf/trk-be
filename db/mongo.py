@@ -18,7 +18,7 @@ async def crea_prov(pcia: Pcia):
     return rta.inserted_id
 
 async def lista_pcias():
-    cursor = c_pcias.find({})
+    cursor = c_pcias.find({}).sort({'nombre':1})
     l_pcias = [una_prov async for una_prov in cursor]
     return l_pcias
 
@@ -79,6 +79,12 @@ async def lista_destinos():
     cursor = c_destinos.find({})
     l_destinos = [un_destino async for un_destino in cursor]
     return l_destinos
+
+async def lista_destinos_pcia(pcia_id : str):
+    cursor = c_destinos.find({"pcia_id" : pcia_id})
+    l_destinos = [un_destino async for un_destino in cursor]
+    return l_destinos
+
 
 # async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
 #     rta = await c_destinos.find_one_and_update({"$push"{ "detalles" : detalle}}})

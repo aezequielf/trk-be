@@ -6,6 +6,7 @@ class Destino(BaseModel):
     lugar: str
     area : str
     provincia : str
+    pcia_id : str
     detalles: list
 
 class DetallesDestino(BaseModel):
