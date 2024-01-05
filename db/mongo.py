@@ -86,6 +86,6 @@ async def lista_destinos_pcia(pcia_id : str):
     return l_destinos
 
 
-# async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
-#     rta = await c_destinos.find_one_and_update({"$push"{ "detalles" : detalle}}})
-#     return rta
+async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
+    rta = await c_destinos.find_one_and_update({"_id" : id},{"$push" : { "detalles" : detalle}})
+    return rta
