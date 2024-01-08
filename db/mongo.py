@@ -18,7 +18,7 @@ async def crea_prov(pcia: Pcia):
     return rta.inserted_id
 
 async def lista_pcias():
-    cursor = c_pcias.find({}).sort({'nombre':1})
+    cursor = c_pcias.find({}).sort("nombre",1)
     l_pcias = [una_prov async for una_prov in cursor]
     return l_pcias
 
