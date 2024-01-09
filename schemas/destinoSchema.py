@@ -3,7 +3,7 @@ def destinoSchema(destino) ->  dict:
         "id": str(destino['_id']),
         "lugar": destino['lugar'],
         "area": destino['area'],
-        "provincia": destino['provincia'],
+        "pcia": destino['pcia'],
         "pcia_id": destino["pcia_id"],
         "detalles": destino['detalles']
     }

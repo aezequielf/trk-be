@@ -4,6 +4,7 @@ from models.pcias import Pcia
 from models.usuarios import Usuario, Usuario_Login,Clave, Guia
 from models.opiniones import Opinion
 from models.destinos import Destino, DetallesDestino
+from datetime import datetime
 
 cnx_motor = AsyncIOMotorClient('localhost',27017)
 
@@ -85,6 +86,21 @@ async def lista_destinos_pcia(pcia_id : str):
     l_destinos = [un_destino async for un_destino in cursor]
     return l_destinos
 
+async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime):
+    cursor = c_destinos.find({"pcia_id" : pcia_id , "detalles.fecha": fecha},{
+    "_id": 1, 
+    "lugar": 1, 
+    "area": 1, 
+    "pcia": 1 ,
+    "pcia_id": 1 ,
+    "detalles": {
+      "$elemMatch": {
+        "fecha": fecha
+      }
+    }
+  })
+    l_destinos = [un_destino async for un_destino in cursor]
+    return l_destinos
 
 async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
     rta = await c_destinos.find_one_and_update({"_id" : id},{"$push" : { "detalles" : detalle}})

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas.destinoSchema import destinoSchema, destinosSchema
 from models.destinos import Destino, DetallesDestino
-from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle
+from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle, lista_destinos_pcia_fecha
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -26,11 +26,24 @@ async def listado_destinos_pcias(id: str):
     except:
         return []
 
+@destino.get('/pcia/{id}/{fecha}',response_model=list[Destino], status_code=200)
+async def listado_destinos_pcias_fecha(id: str, fecha: str):
+    try:
+        fecha = datetime.fromisoformat(fecha)
+    except:
+        raise HTTPException(406, "Fecha mal formada o inesperada")
+    try:
+        return destinosSchema( await lista_destinos_pcia_fecha(id,fecha))
+    except:
+        return []
+
 @destino.put('/{id}')
 async def detalle_destino(id : str, detalle: DetallesDestino):
     if type(detalle.fecha) == str:
-        anio, mes, dia = detalle.fecha.split('-')
-        detalle.fecha = datetime(int(anio),int(mes),int(dia))
+        try:
+            detalle.fecha = datetime.fromisoformat(detalle.fecha)
+        except:
+            raise HTTPException(406, "Fecha mal formada o inesperada")
     detalle = detalle.model_dump()
     try:
         ObjectId(id).is_valid
@@ -39,22 +52,25 @@ async def detalle_destino(id : str, detalle: DetallesDestino):
     try:
         await nuevo_detalle(ObjectId(id), detalle)
     except:
-       raise HTTPException(417, "Id inválido")
+       raise HTTPException(417, "Algún dato enviado es inválido")
     return "Detalle actualizado"
 
 # // Supongamos que la fecha que estás buscando es "2023-12-15"
-# var fechaBuscada = "2023-12-15";
+# var fechaBuscada = new Date("2023-12-15");
 
 # // Consulta MongoDB para filtrar solo los elementos del array servicios que coincidan con la fecha
-# db.tuColeccion.find(
+# db.destinos.find(
 #   {
-#     "servicios.fecha": fechaBuscada
+#     "pica_id": "asdfdasfa"
+#     "detalles.fecha": fechaBuscada
 #   },
 #   {
-#     _id: 1, // Incluir el campo _id si lo necesitas
-#     lugar: 1, // Incluir el campo lugar
-#     area: 1, // Incluir el campo area
-#     servicios: {
+#     _id: 1, 
+#     lugar: 1, 
+#     area: 1, 
+#     provincia: 1 ,
+#     pcia_id: 1 ,
+#     detalles: {
 #       $elemMatch: {
 #         fecha: fechaBuscada
 #       }
