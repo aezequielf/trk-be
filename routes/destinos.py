@@ -4,6 +4,7 @@ from models.destinos import Destino, DetallesDestino
 from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
+from datetime import datetime
 
 
 destino = APIRouter()
@@ -27,6 +28,9 @@ async def listado_destinos_pcias(id: str):
 
 @destino.put('/{id}')
 async def detalle_destino(id : str, detalle: DetallesDestino):
+    if type(detalle.fecha) == str:
+        anio, mes, dia = detalle.fecha.split('-')
+        detalle.fecha = datetime(int(anio),int(mes),int(dia))
     detalle = detalle.model_dump()
     try:
         ObjectId(id).is_valid

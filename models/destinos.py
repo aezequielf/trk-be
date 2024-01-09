@@ -1,5 +1,13 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
+from datetime import datetime
+
+class DetallesDestino(BaseModel):
+    fecha : Optional[Union[datetime,str]] 
+    hora: str
+    guiaid : str
+    empresa : str
+    desc : str
 
 class Destino(BaseModel):
     id: Optional[str] = None
@@ -7,14 +15,8 @@ class Destino(BaseModel):
     area : str
     provincia : str
     pcia_id : str
-    detalles: list
+    detalles: list[DetallesDestino]
 
-class DetallesDestino(BaseModel):
-    fecha : str
-    hora: str
-    guiaid : str
-    empresa : str
-    desc : str
 
 # el find para buscar recorridos que coincida con una fecha
 # fechaBuscada = '2023-12-15'
