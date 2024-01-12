@@ -102,6 +102,38 @@ async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime):
     l_destinos = [un_destino async for un_destino in cursor]
     return l_destinos
 
+async def lista_dest_pcia_desde_hoy(pcia_id : str):
+    fecha = datetime.today()
+#----
+    pipeline = [
+        {
+            '$match': {
+                'pcia_id': pcia_id,
+                'detalles.fecha': {'$gte': fecha}
+            }
+        },
+        {
+            '$project': {
+                '_id': 1,
+                'lugar': 1,
+                'area': 1,
+                'pcia': 1,
+                'pcia_id': 1,
+                'detalles': {
+                    '$filter': {
+                        'input': '$detalles',
+                        'as': 'detalle',
+                        'cond': {'$gte': ['$$detalle.fecha', fecha]}
+                    }
+                }
+            }
+        }
+    ]
+#-----
+    cursor =  c_destinos.aggregate(pipeline)
+    l_destinos = [un_destino async for un_destino in cursor]
+    return l_destinos
+
 async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
     rta = await c_destinos.find_one_and_update({"_id" : id},{"$push" : { "detalles" : detalle}})
     return rta

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas.destinoSchema import destinoSchema, destinosSchema
 from models.destinos import Destino, DetallesDestino
-from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle, lista_destinos_pcia_fecha
+from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle, lista_destinos_pcia_fecha, lista_dest_pcia_desde_hoy
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -23,6 +23,13 @@ async def listado_destinos():
 async def listado_destinos_pcias(id: str):
     try:
         return destinosSchema( await lista_destinos_pcia(id))
+    except:
+        return []
+
+@destino.get('/pcia/{id}/todas',response_model=list[Destino], status_code=200)
+async def listado_destinos_pcias_desde_hoy(id: str):
+    try:
+        return destinosSchema( await lista_dest_pcia_desde_hoy(id))
     except:
         return []
 
