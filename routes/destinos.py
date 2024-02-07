@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from schemas.destinoSchema import destinoSchema, destinosSchema
+from schemas.destinoSchema import destinoSchema, destinosSchema, detalleSchema, detallesSchema
 from models.destinos import Destino, DetallesDestino
-from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle, lista_destinos_pcia_fecha, lista_dest_pcia_desde_hoy
+from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle,lista_destinos_pcia_fecha
+#, lista_dest_pcia_desde_hoy
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -26,41 +27,38 @@ async def listado_destinos_pcias(id: str):
     except:
         return []
 
-@destino.get('/pcia/{id}/todas',response_model=list[Destino], status_code=200)
-async def listado_destinos_pcias_desde_hoy(id: str):
-    try:
-        return destinosSchema( await lista_dest_pcia_desde_hoy(id))
-    except:
-        return []
+# @destino.get('/pcia/{id}/todas',response_model=list[Destino], status_code=200)
+# async def listado_destinos_pcias_desde_hoy(id: str):
+#     try:
+#         return destinosSchema( await lista_dest_pcia_desde_hoy(id))
+#     except:
+#         return []
 
-@destino.get('/pcia/{id}/{fecha}',response_model=list[Destino], status_code=200)
+@destino.get('/pcia/{id}/{fecha}', response_model=list[dict],status_code=200)
 async def listado_destinos_pcias_fecha(id: str, fecha: str):
     try:
         fecha = datetime.fromisoformat(fecha)
     except:
         raise HTTPException(406, "Fecha mal formada o inesperada")
     try:
-        return destinosSchema( await lista_destinos_pcia_fecha(id,fecha))
+        return  await lista_destinos_pcia_fecha(id, fecha)
     except:
         return []
 
-@destino.put('/{id}')
-async def detalle_destino(id : str, detalle: DetallesDestino):
+@destino.post('/adddetalle')
+async def detalle_destino( detalle: DetallesDestino):
     if type(detalle.fecha) == str:
         try:
             detalle.fecha = datetime.fromisoformat(detalle.fecha)
         except:
             raise HTTPException(406, "Fecha mal formada o inesperada")
-    detalle = detalle.model_dump()
+    detalle = detalle.model_dump(exclude={"id"})
     try:
-        ObjectId(id).is_valid
-    except:
-        raise HTTPException(406, "Id inválido")
-    try:
-        await nuevo_detalle(ObjectId(id), detalle)
+        rta = await nuevo_detalle( detalle)
     except:
        raise HTTPException(417, "Algún dato enviado es inválido")
-    return "Detalle actualizado"
+    return "Detalle actualizado "+str(rta)
+
 
 # // Supongamos que la fecha que estás buscando es "2023-12-15"
 # var fechaBuscada = new Date("2023-12-15");

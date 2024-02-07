@@ -12,6 +12,7 @@ c_pcias = cnx_motor.tpdb.pcias
 c_usuarios = cnx_motor.tpdb.usuarios
 c_opiniones = cnx_motor.tpdb.opiniones
 c_destinos = cnx_motor.tpdb.destinos
+c_detalles = cnx_motor.tpdb.detalles
 
 # crud provincias
 async def crea_prov(pcia: Pcia):
@@ -86,54 +87,55 @@ async def lista_destinos_pcia(pcia_id : str):
     l_destinos = [un_destino async for un_destino in cursor]
     return l_destinos
 
+async def nuevo_detalle( detalle : DetallesDestino):
+    rta = await c_detalles.insert_one(detalle)
+    return rta.inserted_id
+
 async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime):
-    cursor = c_destinos.find({"pcia_id" : pcia_id , "detalles.fecha": fecha},{
-    "_id": 1, 
-    "lugar": 1, 
-    "area": 1, 
-    "pcia": 1 ,
-    "pcia_id": 1 ,
-    "detalles": {
-      "$elemMatch": {
-        "fecha": fecha
-      }
-    }
-  })
-    l_destinos = [un_destino async for un_destino in cursor]
-    return l_destinos
-
-async def lista_dest_pcia_desde_hoy(pcia_id : str):
-    fecha = datetime.today()
-#----
     pipeline = [
-        {
-            '$match': {
-                'pcia_id': pcia_id,
-                'detalles.fecha': {'$gte': fecha}
-            }
-        },
-        {
-            '$project': {
-                '_id': 1,
-                'lugar': 1,
-                'area': 1,
-                'pcia': 1,
-                'pcia_id': 1,
-                'detalles': {
-                    '$filter': {
-                        'input': '$detalles',
-                        'as': 'detalle',
-                        'cond': {'$gte': ['$$detalle.fecha', fecha]}
-                    }
+            {
+                '$match': {
+                    'pcia_id': pcia_id,
+                    'fecha': { "$eq" :fecha}
                 }
+            },
+            {
+                '$group': { "_id" :"$lugar" ,
+                           "destino_id" : {"$first" : "$destino_id"} }
             }
-        }
-    ]
-#-----
-    cursor =  c_destinos.aggregate(pipeline)
-    l_destinos = [un_destino async for un_destino in cursor]
-    return l_destinos
+        ]
+    l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
+    return l_detalles
 
-async def nuevo_detalle(id: ObjectId(), detalle : DetallesDestino):
-    rta = await c_destinos.find_one_and_update({"_id" : id},{"$push" : { "detalles" : detalle}})
-    return rta
+# async def lista_dest_pcia_desde_hoy(pcia_id : str):
+#     fecha = datetime.today()
+# #----
+#     pipeline = [
+#         {
+#             '$match': {
+#                 'pcia_id': pcia_id,
+#                 'detalles.fecha': {'$gte': fecha}
+#             }
+#         },
+#         {
+#             '$project': {
+#                 '_id': 1,
+#                 'lugar': 1,
+#                 'area': 1,
+#                 'pcia': 1,
+#                 'pcia_id': 1,
+#                 'detalles': {
+#                     '$filter': {
+#                         'input': '$detalles',
+#                         'as': 'detalle',
+#                         'cond': {'$gte': ['$$detalle.fecha', fecha]}
+#                     }
+#                 }
+#             }
+#         }
+#     ]
+# #-----
+#     cursor =  c_destinos.aggregate(pipeline)
+#     l_destinos = [un_destino async for un_destino in cursor]
+#     return l_destinos
+

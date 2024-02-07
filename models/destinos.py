@@ -3,6 +3,11 @@ from typing import Optional, Union
 from datetime import datetime
 
 class DetallesDestino(BaseModel):
+    id: Optional[str] = None
+    destino_id : str
+    lugar: str
+    pcia : str
+    pcia_id : str
     fecha : Optional[Union[datetime,str]] 
     hora: str
     guia_id : str
@@ -15,7 +20,6 @@ class Destino(BaseModel):
     area : str
     pcia : str
     pcia_id : str
-    detalles: list[DetallesDestino]
 
 
 # el find para buscar recorridos que coincida con una fecha
@@ -29,13 +33,7 @@ class Destino(BaseModel):
 #   }
 # );
     
-{
-  "fecha" : "2024-01-28",
-    "hora": "8 am",
-    "guiaid" : "987asdf987ee",
-    "empresa" : "siga siga",
-    "desc" : "Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni non nesciunt excepturi deserunt voluptatum ipsa ipsam quia, earum at, tempora numquam similique eveniet?"
-}
+
     # {
     #     "lugar": "Cerro Wonk",
     #     "area" : "la cumbrecita",
