@@ -102,40 +102,37 @@ async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime):
             {
                 '$group': { "_id" :"$lugar" ,
                            "destino_id" : {"$first" : "$destino_id"} }
+            },
+            {
+                '$sort': {
+               "_id": 1  }
             }
         ]
     l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
     return l_detalles
 
-# async def lista_dest_pcia_desde_hoy(pcia_id : str):
-#     fecha = datetime.today()
-# #----
-#     pipeline = [
-#         {
-#             '$match': {
-#                 'pcia_id': pcia_id,
-#                 'detalles.fecha': {'$gte': fecha}
-#             }
-#         },
-#         {
-#             '$project': {
-#                 '_id': 1,
-#                 'lugar': 1,
-#                 'area': 1,
-#                 'pcia': 1,
-#                 'pcia_id': 1,
-#                 'detalles': {
-#                     '$filter': {
-#                         'input': '$detalles',
-#                         'as': 'detalle',
-#                         'cond': {'$gte': ['$$detalle.fecha', fecha]}
-#                     }
-#                 }
-#             }
-#         }
-#     ]
-# #-----
-#     cursor =  c_destinos.aggregate(pipeline)
-#     l_destinos = [un_destino async for un_destino in cursor]
-#     return l_destinos
+async def lista_dest_pcia_desde_hoy(pcia_id : str):
+    fecha = datetime.today()
+    pipeline = [
+            {
+                '$match': {
+                    'pcia_id': pcia_id,
+                    'fecha': { "$gte" :fecha}
+                }
+            },
+            {
+                '$group': { "_id" :"$lugar" ,
+                           "destino_id" : {"$first" : "$destino_id"} }
+            },
+            {
+                '$sort': {
+               "_id": 1  }
+            }
+        ]
+    l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
+    return l_detalles
 
+async def lista_detalle_destinos(destino_id : str):
+    fecha = datetime.today()
+    l_detalles = [un_detalle async for un_detalle in c_detalles.find({"destino_id" : destino_id, "fecha" : { "$gte" : fecha}}).sort({ "fecha" : 1})] 
+    return l_detalles
