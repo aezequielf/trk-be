@@ -91,7 +91,11 @@ async def nuevo_detalle( detalle : DetallesDestino):
     rta = await c_detalles.insert_one(detalle)
     return rta.inserted_id
 
-async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime):
+async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime = None):
+    if fecha==None:
+        fecha = datetime.today()
+        l_detalles = [un_detalle async for un_detalle in c_detalles.find({'pcia_id': pcia_id, 'fecha' : {'$gte' : fecha}},{'fecha': 1, '_id' : 0} )]
+        return l_detalles
     pipeline = [
             {
                 '$match': {
