@@ -93,9 +93,35 @@ async def nuevo_detalle( detalle : DetallesDestino):
 
 async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime = None):
     if fecha==None:
-        fecha = datetime.today()
-        l_detalles = [un_detalle async for un_detalle in c_detalles.find({'pcia_id': pcia_id, 'fecha' : {'$gte' : fecha}},{'fecha': 1, '_id' : 0} )]
+        fecha_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        pipeline = [
+            {
+                '$match': {
+                    'fecha': {
+                        '$gte': fecha_hoy
+                    },
+                'pcia_id': pcia_id
+                    
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        '$dateToString': {
+                            'format': '%Y-%m-%d', 
+                            'date': '$fecha'
+                        }
+                    }
+                }
+            }, {
+                '$sort': {
+                    'fecha': 1
+                }
+            }
+        ]
+
+        l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
         return l_detalles
+
     pipeline = [
             {
                 '$match': {
@@ -109,7 +135,7 @@ async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime = None):
             },
             {
                 '$sort': {
-               "_id": 1  }
+               "lugar": 1  }
             }
         ]
     l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]

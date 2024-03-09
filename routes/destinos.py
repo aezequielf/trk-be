@@ -36,7 +36,7 @@ async def listado_destinos_pcias_desde_hoy(id: str):
         return []
 
 
-@destino.get('/pcia/{id}/fechas')
+@destino.get('/pcia/{id}/fechas', response_model=list[dict],status_code=200)
 async def listado_destinos_pcias_fecha(id: str):
     try:
         return  await lista_destinos_pcia_fecha(id)
