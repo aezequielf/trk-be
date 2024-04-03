@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from schemas.usuarioSchema import usuarioSchema, usuariosSchema
-from models.usuarios import Usuario, Usuario_Login, Clave
-from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario, actualiza_pass_usuario
+from models.usuarios import Usuario, Usuario_Login, Clave, Credenciales
+from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario, actualiza_pass_usuario, un_usuario_mail
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
+from passlib.context import CryptContext
+from datetime import datetime
 
-
+crypt = CryptContext(schemes="bcrypt")
 usuario = APIRouter()
 
 @usuario.get('/', response_model=list[Usuario], status_code=200)
@@ -23,6 +25,17 @@ async def un_usuarios(id: str):
     except:
         raise HTTPException(404, "No encontrado ese id")
     return usuario
+
+@usuario.post('/login', response_model=str, status_code=202)
+async def valida_usuario(credenciales: Credenciales):
+    clave = await un_usuario_mail(credenciales.email)
+    if clave=='vacio':
+        raise HTTPException(404, 'Usuario y claves erroneos')
+    if crypt.verify(credenciales.clave, clave):
+        return 'usuaio ok'
+    else:
+        raise HTTPException(404, 'Combinacion usuario y claves incorrecto')
+
 
 @usuario.post('/add', response_model=str, status_code=201)
 async def nuevo_usuario(usuario: Usuario_Login):
@@ -44,6 +57,8 @@ async def nuevo_usuario(usuario: Usuario_Login):
     else:
         usuario["apellido"]=usuario["apellido"].capitalize()
     usuario["email"]=usuario["email"].lower()
+    usuario["clave"]=crypt.hash(usuario["clave"])
+    usuario["creado"]=datetime.now()
     try:
         rta = await crea_usuario(usuario)
     except DuplicateKeyError:

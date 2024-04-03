@@ -5,7 +5,8 @@ def usuarioSchema(usuario) -> dict:
     "apellido": usuario['apellido'],
     "email": usuario['email'],
     "esguia": usuario['esguia'],
-    "clave": usuario['clave']
+    "clave": usuario['clave'],
+    "creado" : usuario['creado']
     }
 
 def usuariosSchema(usuarios) -> list:

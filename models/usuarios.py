@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 class Usuario(BaseModel):
     id: Optional[str] = None
@@ -7,11 +8,16 @@ class Usuario(BaseModel):
     apellido: str
     email: str
     esguia: bool = False
+    creado: Optional[datetime] = None    
 
 class Usuario_Login(Usuario):
     clave : str
 
 class Clave(BaseModel):
+    clave: str
+
+class Credenciales(BaseModel):
+    email: str
     clave: str
 
 class Guia(BaseModel):

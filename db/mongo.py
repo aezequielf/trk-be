@@ -47,6 +47,12 @@ async def un_usuario(id: ObjectId):
     usuario = await c_usuarios.find_one({"_id": id})
     return usuario
 
+async def un_usuario_mail( email : str):
+    clave = await c_usuarios.find_one({'email': email },{'clave': 1, '_id': 0})
+    if clave == None:
+        return 'vacio'
+    return clave['clave']
+
 async def eliminar_usuario(id: ObjectId):
     rta = await c_usuarios.delete_one({"_id": id})
     return rta
