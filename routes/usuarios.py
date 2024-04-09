@@ -1,18 +1,70 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer #, OAuth2PasswordRequestForm
 from schemas.usuarioSchema import usuarioSchema, usuariosSchema
 from models.usuarios import Usuario, Usuario_Login, Clave, Credenciales
 from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario, actualiza_pass_usuario, un_usuario_mail
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from passlib.context import CryptContext
-from datetime import datetime
+from datetime import datetime, timedelta
+from jose import jwt, JWTError
+
+OAuth2 = OAuth2PasswordBearer(tokenUrl="login")
 
 crypt = CryptContext(schemes="bcrypt")
+ALGENC= "HS256"
+TOKEN_DURATION= 1
+SECRET = "metIcETUSTrYPTorDemEgAMInFedNODyFasitudmetIcETUSTrYPTorDemEgAMInFedNODyFasitud"
+
 usuario = APIRouter()
+
+
+
 
 @usuario.get('/', response_model=list[Usuario], status_code=200)
 async def listado_usuarios():
     return usuariosSchema( await lista_usuarios()) 
+
+async def current_user(token: str = Depends(OAuth2)):
+    try:
+        id_usuario = jwt.decode(token,SECRET, algorithms=ALGENC).get("sub")
+        if id_usuario == None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                            detail='Algo Salió mal', 
+                            headers={"WWW-Authenticate": "Bearer"})
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                    detail='Credenciales incorrectas o token inváldo/expirado !!!', 
+                    headers={"WWW-Authenticate": "Bearer"}) 
+    try:
+        usuario = Usuario(**usuarioSchema(await un_usuario(ObjectId(id_usuario))))
+    except:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                            detail='Algo Salió malm sub erroneo', 
+                            headers={"WWW-Authenticate": "Bearer"})
+    return usuario
+
+@usuario.get("/yo")
+async def funcion_yo(valor : Usuario = Depends(current_user)):
+    return valor
+
+@usuario.post("/login")
+async def login_user(form: Credenciales):
+    try:
+        usuario = usuarioSchema(await un_usuario_mail(form.email))
+    except TypeError:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="Usuario y claves erroneos")
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Algo Salió mal")
+    if crypt.verify(form.clave, usuario['clave']):
+        expire= datetime.utcnow()+ timedelta(minutes=TOKEN_DURATION)
+        token ={
+            "sub" : usuario["id"],
+            "exp": expire,
+        }
+        return {"un_token": jwt.encode(token, SECRET, algorithm=ALGENC ) , "type": "bearer"}
+    raise HTTPException(404, 'Combinacion usuario y claves incorrecto')
+    
 
 @usuario.get('/{id}', response_model=Usuario, status_code=200)
 async def un_usuarios(id: str):
@@ -25,17 +77,6 @@ async def un_usuarios(id: str):
     except:
         raise HTTPException(404, "No encontrado ese id")
     return usuario
-
-@usuario.post('/login', response_model=str, status_code=202)
-async def valida_usuario(credenciales: Credenciales):
-    clave = await un_usuario_mail(credenciales.email)
-    if clave=='vacio':
-        raise HTTPException(404, 'Usuario y claves erroneos')
-    if crypt.verify(credenciales.clave, clave):
-        return 'usuaio ok'
-    else:
-        raise HTTPException(404, 'Combinacion usuario y claves incorrecto')
-
 
 @usuario.post('/add', response_model=str, status_code=201)
 async def nuevo_usuario(usuario: Usuario_Login):
