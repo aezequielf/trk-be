@@ -27,14 +27,7 @@ async def lista_una_prov(id: str):
 @pcia.post("/add", response_model=str, status_code=201)
 async def crear_una_prov(pcia: Pcia):
     pcia = pcia.model_dump(exclude={"id"})
-    if len(pcia["nombre"].split()) > 1:
-        nombres = pcia["nombre"].split()
-        pcia["nombre"] = ''
-        for una_prov in nombres:
-            pcia["nombre"] += una_prov.capitalize()+' '
-        pcia["nombre"] =  pcia["nombre"].rstrip()
-    else:
-        pcia['nombre']= pcia['nombre'].capitalize()
+    pcia['nombre']= pcia['nombre'].title()
     try:
         rta = await crea_prov(pcia)
     except DuplicateKeyError:

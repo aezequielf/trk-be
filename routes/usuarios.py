@@ -62,7 +62,7 @@ async def login_user(form: Credenciales):
             "sub" : usuario["id"],
             "exp": expire,
         }
-        return {"un_token": jwt.encode(token, SECRET, algorithm=ALGENC ) , "type": "bearer"}
+        return {"token": jwt.encode(token, SECRET, algorithm=ALGENC ) , "type": "bearer"}
     raise HTTPException(404, 'Combinacion usuario y claves incorrecto')
     
 
@@ -81,22 +81,8 @@ async def un_usuarios(id: str):
 @usuario.post('/add', response_model=str, status_code=201)
 async def nuevo_usuario(usuario: Usuario_Login):
     usuario = usuario.model_dump(exclude={"id"})
-    if len(usuario["nombre"].split()) > 1:
-        nombres = usuario["nombre"].split()
-        usuario["nombre"] = ''
-        for nombre in nombres:
-            usuario["nombre"] += nombre.capitalize()+' '
-        usuario["nombre"] =  usuario["nombre"].rstrip()
-    else:
-        usuario["nombre"]=usuario["nombre"].capitalize()
-    if len(usuario["apellido"].split()) > 1:
-        apellidos = usuario["apellido"].split()
-        usuario["apellido"] = ''
-        for apellido in apellidos:
-            usuario["apellido"] += apellido.capitalize()+' '
-        usuario["apellido"] = usuario["apellido"].rstrip()
-    else:
-        usuario["apellido"]=usuario["apellido"].capitalize()
+    usuario["nombre"]=usuario["nombre"].title()
+    usuario["apellido"]=usuario["apellido"].title()
     usuario["email"]=usuario["email"].lower()
     usuario["clave"]=crypt.hash(usuario["clave"])
     usuario["creado"]=datetime.now()
