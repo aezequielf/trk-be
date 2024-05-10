@@ -13,7 +13,7 @@ OAuth2 = OAuth2PasswordBearer(tokenUrl="login")
 
 crypt = CryptContext(schemes="bcrypt")
 ALGENC= "HS256"
-TOKEN_DURATION= 1
+TOKEN_DURATION= 30
 SECRET = "metIcETUSTrYPTorDemEgAMInFedNODyFasitudmetIcETUSTrYPTorDemEgAMInFedNODyFasitud"
 
 usuario = APIRouter()
