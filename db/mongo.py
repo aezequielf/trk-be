@@ -51,12 +51,6 @@ async def un_usuario_mail( email : str):
     usuario = await c_usuarios.find_one({'email': email })
     return usuario
 
-# async def un_usuario_mail( email : str):
-#     clave = await c_usuarios.find_one({'email': email },{'clave': 1, '_id': 0})
-#     if clave == None:
-#         return 'vacio'
-#     return clave['clave']
-
 async def eliminar_usuario(id: ObjectId):
     rta = await c_usuarios.delete_one({"_id": id})
     return rta
@@ -71,8 +65,8 @@ async def actualiza_pass_usuario(id: ObjectId, clave: Clave):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": clave})
     return rta
 
-async def actualiza_usuario_aguia(id: ObjectId, usuario: Usuario):
-    rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(usuario)})
+async def actualiza_usuario_aguia(id: ObjectId, datosgia: Guia):
+    rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(datosgia)})
     return rta
 
 # Actualizar opiniones de usuario para guías.

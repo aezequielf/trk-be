@@ -24,4 +24,9 @@ class Guia(BaseModel):
     esguia : Optional[bool] = None
     empresa: str
     matricula: str
+    resolucion: str
+    cels: list
+    actividad: list
+
+
 
