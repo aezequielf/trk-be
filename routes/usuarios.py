@@ -41,7 +41,7 @@ async def current_user(token: str = Depends(OAuth2)):
         usuario = Usuario(**usuarioSchema(await un_usuario(ObjectId(id_usuario))))
     except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
-                            detail='Algo Salió malm sub erroneo', 
+                            detail='Algo Salió mal sub erroneo', 
                             headers={"WWW-Authenticate": "Bearer"})
     return usuario
 
