@@ -12,7 +12,8 @@ class Usuario(BaseModel):
     empresa: Optional[str] = None
     matricula: Optional[str] = None
     resolucion: Optional[str] = None
-    cels: Optional[str] = None
+    cel: Optional[str] = None
+    celalt: Optional[str] = None
     actividad: Optional[str] = None 
 
 class Usuario_Login(Usuario):
@@ -30,7 +31,8 @@ class Guia(BaseModel):
     empresa: str
     matricula: str
     resolucion: str
-    cels: str
+    cel: str
+    celalt: str
     actividad: str
 
 

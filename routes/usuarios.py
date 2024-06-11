@@ -91,7 +91,7 @@ async def nuevo_usuario(usuario: Usuario_Login):
         rta = await crea_usuario(usuario)
     except DuplicateKeyError:
         raise HTTPException(409, 'El correo ya existe, no se puede duplicar')
-    return "Usuario Creado Correctamente: "+str(rta)
+    return "Ok: "+str(rta)
 
 @usuario.delete('/{id}', response_model=str, status_code=202)
 async def un_usuarios(id: str):
