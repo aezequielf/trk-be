@@ -4,6 +4,7 @@ from models.pcias import Pcia
 from models.usuarios import Usuario, Usuario_Login,Clave, Guia
 from models.opiniones import Opinion
 from models.destinos import Destino, DetallesDestino
+from models.travesias import Travesia
 from datetime import datetime
 
 cnx_motor = AsyncIOMotorClient('localhost',27017)
@@ -13,6 +14,7 @@ c_usuarios = cnx_motor.tpdb.usuarios
 c_opiniones = cnx_motor.tpdb.opiniones
 c_destinos = cnx_motor.tpdb.destinos
 c_detalles = cnx_motor.tpdb.detalles
+c_travesias = cnx_motor.tpdb.travesias
 
 # crud provincias
 async def crea_prov(pcia: Pcia):
@@ -91,9 +93,36 @@ async def lista_destinos_pcia(pcia_id : str):
     l_destinos = [un_destino async for un_destino in cursor]
     return l_destinos
 
+# cambiamos detalles por travesias que es su nombre correcto
+
 async def nuevo_detalle( detalle : DetallesDestino):
     rta = await c_detalles.insert_one(detalle)
     return rta.inserted_id
+
+async def nueva_travesia(travesia : Travesia):
+    rta = await c_travesias.insert_one(travesia)
+    if (rta.acknowledged):
+        return rta.inserted_id
+    return None
+
+async def localiza_trav_id(id : ObjectId):
+    travesia = await c_travesias.find_one({'_id' : id})
+    return travesia
+
+async def lista_trav_guia(id : str):
+    cursor_travesias = c_travesias.find({'guia_id': id}).sort({'fecha' : 1})
+    l_travesias = [travesia async for travesia in cursor_travesias]
+    return l_travesias
+
+async def list_travesias():
+    cursortravesias = c_travesias.find({})
+    l_travesias = [travesia async for travesia in cursortravesias]
+    return l_travesias
+
+async def borra_travesia(id: ObjectId):
+    rta = await c_travesias.delete_one({"_id": id})
+    return rta
+
 
 async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime = None):
     if fecha==None:
@@ -166,6 +195,9 @@ async def lista_dest_pcia_desde_hoy(pcia_id : str):
     l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
     return l_detalles
 
+async def destino_id(id: ObjectId):
+    return await c_destinos.find_one({'_id': id})
+    
 async def lista_detalle_destinos(destino_id : str):
     fecha = datetime.today()
     l_detalles = [un_detalle async for un_detalle in c_detalles.find({"destino_id" : destino_id, "fecha" : { "$gte" : fecha}}).sort({ "fecha" : 1})] 

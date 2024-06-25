@@ -1,0 +1,50 @@
+from fastapi import APIRouter, HTTPException, status
+from schemas.travesiaSchema import travesiaSchema, travesiasSchema
+from models.travesias import Travesia
+from db.mongo import list_travesias, nueva_travesia, localiza_trav_id,borra_travesia, lista_trav_guia
+from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
+from datetime import datetime
+
+travesia = APIRouter()
+
+@travesia.get('/')
+async def listado_travesias():
+    return travesiasSchema(await list_travesias())
+
+@travesia.get('/guia/{id}')
+async def listar_travesia_guia(id: str):
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id incorrecto')
+    travesiasxguia = travesiasSchema(await lista_trav_guia(id))
+    return travesiasxguia
+
+@travesia.post('/add')
+async def agrega_travesia(travesia : Travesia):
+    if type(travesia.fecha) == str:
+        try:
+            travesia.fecha = datetime.fromisoformat(travesia.fecha)
+        except:
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail= "Fecha mal formada o inesperada")
+    travesia = travesia.model_dump(exclude={"id"})
+    travesia_id = await nueva_travesia(travesia)
+    if(travesia_id != None):
+        return travesiaSchema(await localiza_trav_id(travesia_id))
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="algo salio mal")
+
+
+@travesia.delete('/del/{id}')
+async def borrar_travesia(id : str):
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id incorrecto')
+    rta = await borra_travesia(ObjectId(id))
+    if rta.acknowledged:
+        if rta.deleted_count > 0:
+            return f"Travesía  Eliminada"
+        else:
+            return "Travesia Inexistente, nada borrado"
+    raise HTTPException(500, 'Algo salio mal')

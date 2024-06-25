@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from schemas.destinoSchema import destinoSchema, destinosSchema, detalleSchema, detallesSchema
 from models.destinos import Destino, DetallesDestino
-from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle,lista_destinos_pcia_fecha, lista_dest_pcia_desde_hoy, lista_detalle_destinos
+from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle,lista_destinos_pcia_fecha, lista_dest_pcia_desde_hoy, lista_detalle_destinos, destino_id
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -56,7 +56,15 @@ async def listado_destinos_pcias_fecha(id: str, fecha: str):
     except:
         return []
     
-@destino.get('/{id_destino}', response_model=list[DetallesDestino], status_code=200)
+@destino.get('/{id}')
+async def traer_destino(id: str):
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id invalido')
+    return destinoSchema(await destino_id(ObjectId(id)))
+
+@destino.get('/lista/{id_destino}', response_model=list[DetallesDestino], status_code=200)
 async def listado_destinos_detas(id_destino :str):
     try:
         return detallesSchema(await lista_detalle_destinos(id_destino))
