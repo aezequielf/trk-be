@@ -16,6 +16,7 @@ c_destinos = cnx_motor.tpdb.destinos
 c_detalles = cnx_motor.tpdb.detalles
 c_travesias = cnx_motor.tpdb.travesias
 
+
 # crud provincias
 async def crea_prov(pcia: Pcia):
     rta = await c_pcias.insert_one(pcia)
@@ -73,8 +74,17 @@ async def actualiza_usuario_aguia(id: ObjectId, datosgia: Guia):
 
 # Actualizar opiniones de usuario para guías.
 
-async def nueva_opinion_guia(id: ObjectId, opinion: Opinion):
+async def crea_opinion(opinion: Opinion):
     rta = await c_opiniones.insert_one(opinion)
+    return rta
+
+async def obtener_opiniones():
+    cursor = c_opiniones.find({})
+    opiniones = [opinion async for opinion in cursor]
+    return opiniones
+
+async def obtener_opinion_id(id : ObjectId):
+    rta = await c_opiniones.find_one({'_id': id})
     return rta
 
 # crud recorridos/ travesías
@@ -118,6 +128,10 @@ async def list_travesias():
     cursortravesias = c_travesias.find({})
     l_travesias = [travesia async for travesia in cursortravesias]
     return l_travesias
+
+async def actualiza_travesia(id: ObjectId, travesia: Travesia):
+    rta = await c_travesias.find_one_and_update({"_id": id},{"$set":travesia})
+    return rta
 
 async def borra_travesia(id: ObjectId):
     rta = await c_travesias.delete_one({"_id": id})

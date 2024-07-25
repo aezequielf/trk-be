@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer #, OAuth2PasswordRequestForm
-from schemas.usuarioSchema import usuarioSchema, usuariosSchema
 from models.usuarios import Usuario, Usuario_Login, Clave, Credenciales, Guia
 from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario,\
 actualiza_pass_usuario, un_usuario_mail, actualiza_usuario_aguia
@@ -24,7 +23,8 @@ usuario = APIRouter()
 
 @usuario.get('/', response_model=list[Usuario], status_code=200)
 async def listado_usuarios():
-    return usuariosSchema( await lista_usuarios()) 
+    listado = [Usuario(**usuario) for usuario in await lista_usuarios()]
+    return listado 
 
 async def current_user(token: str = Depends(OAuth2)):
     try:
@@ -38,7 +38,7 @@ async def current_user(token: str = Depends(OAuth2)):
                     detail='Credenciales incorrectas o token inváldo/expirado !!!', 
                     headers={"WWW-Authenticate": "Bearer"}) 
     try:
-        usuario = Usuario(**usuarioSchema(await un_usuario(ObjectId(id_usuario))))
+        usuario = Usuario(**await un_usuario(ObjectId(id_usuario)))
     except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                             detail='Algo Salió mal sub erroneo', 
@@ -52,7 +52,8 @@ async def funcion_yo(valor : Usuario = Depends(current_user)):
 @usuario.post("/login")
 async def login_user(form: Credenciales):
     try:
-        usuario = usuarioSchema(await un_usuario_mail(form.email))
+        usuario = await un_usuario_mail(form.email)
+        usuario = Usuario_Login(**usuario).model_dump()
     except TypeError:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="Usuario y claves erroneos")
     except:
@@ -74,7 +75,7 @@ async def un_usuarios(id: str):
     except:
         raise HTTPException(406, "Id inválido")
     try:
-        usuario = usuarioSchema(await un_usuario(ObjectId(id)))
+        usuario =Usuario(**await un_usuario(ObjectId(id)))
     except:
         raise HTTPException(404, "No encontrado ese id")
     return usuario

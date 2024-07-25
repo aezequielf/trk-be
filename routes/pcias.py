@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from schemas.pciaSchema import pciaSchema, pciasSchema
 from models.pcias import Pcia
 from db.mongo import crea_prov, lista_pcias, una_pcia, eliminar_pcia
 from bson import ObjectId
@@ -10,7 +9,8 @@ pcia = APIRouter()
 
 @pcia.get("/", response_model=list[Pcia], status_code=200)
 async def lista_de_pcias():
-    return pciasSchema(await lista_pcias())
+    listado = [Pcia(**pcia) for pcia in await lista_pcias()]
+    return listado
 
 @pcia.get("/{id}", response_model=Pcia, status_code=200)
 async def lista_una_prov(id: str):
@@ -19,7 +19,7 @@ async def lista_una_prov(id: str):
     except:
         raise HTTPException(406, "Id inválido")
     try:
-        pcia = pciaSchema(await una_pcia(ObjectId(id)))
+        pcia = await una_pcia(ObjectId(id))
     except:
         raise HTTPException(404, "No Existe")
     return Pcia(**pcia)

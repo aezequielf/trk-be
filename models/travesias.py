@@ -1,9 +1,8 @@
-from pydantic import BaseModel
 from typing import Optional, Union
 from datetime import datetime
+from models.mongobase import MongoBaseModel
 
-class Travesia(BaseModel):
-    id: Optional[str] = None
+class Travesia(MongoBaseModel):
     destino_id : str
     dificultad : str
     lugar: str

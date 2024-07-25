@@ -1,6 +1,5 @@
-from pydantic import BaseModel
 from typing import Optional
+from models.mongobase import MongoBaseModel
 
-class Pcia(BaseModel):
-    id: Optional[str] = None
+class Pcia(MongoBaseModel):
     nombre: str

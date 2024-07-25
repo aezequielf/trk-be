@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from schemas.travesiaSchema import travesiaSchema, travesiasSchema
 from models.travesias import Travesia
-from db.mongo import list_travesias, nueva_travesia, localiza_trav_id,borra_travesia, lista_trav_guia
+from db.mongo import list_travesias, nueva_travesia, localiza_trav_id,borra_travesia, lista_trav_guia, actualiza_travesia
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -10,7 +10,8 @@ travesia = APIRouter()
 
 @travesia.get('/')
 async def listado_travesias():
-    return travesiasSchema(await list_travesias())
+    travesias = [Travesia(**travesia) for travesia in await list_travesias()]
+    return travesias
 
 @travesia.get('/guia/{id}')
 async def listar_travesia_guia(id: str):
@@ -31,7 +32,7 @@ async def agrega_travesia(travesia : Travesia):
     travesia = travesia.model_dump(exclude={"id"})
     travesia_id = await nueva_travesia(travesia)
     if(travesia_id != None):
-        return travesiaSchema(await localiza_trav_id(travesia_id))
+        return Travesia(**await localiza_trav_id(travesia_id))
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="algo salio mal")
 
 
@@ -48,3 +49,14 @@ async def borrar_travesia(id : str):
         else:
             return "Travesia Inexistente, nada borrado"
     raise HTTPException(500, 'Algo salio mal')
+
+@travesia.put('/actualiza')
+async def act_travesia(travesia: Travesia):
+    id = travesia.id
+    travesia = travesia.model_dump(exclude={"id"})
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id incorrecto')
+    rta = Travesia(** await actualiza_travesia(ObjectId(id), travesia))
+    return rta

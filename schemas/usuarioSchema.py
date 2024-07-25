@@ -1,22 +1,26 @@
 def usuarioSchema(usuario) -> dict:
-    schema = {
-        "id": str(usuario['_id']), 
-        "nombre": usuario['nombre'],
-        "apellido": usuario['apellido'],
-        "email": usuario['email'],
-        "esguia": usuario['esguia'],
-        "clave": usuario['clave'],
-        "creado": usuario['creado']
-    }
-    schema.update({
-            "empresa": usuario.get('empresa'),
-            "matricula": usuario.get('matricula'),
-            "resolucion": usuario.get('resolucion'),
-            "cel": usuario.get('cel'),
-            "actividad": usuario.get('actividad'),
-            "celalt" : usuario.get('celalt')
-        })
-    return schema
+    # cambio el objectid por string y como usuario ya es un dict no solo controlo eso y devuelvo el resto
+    usuario['id'] = str(usuario['_id'])
+    del(usuario['_id'])
+    return usuario
+    # schema = {
+    #     "id": str(usuario['_id']), 
+    #     "nombre": usuario['nombre'],
+    #     "apellido": usuario['apellido'],
+    #     "email": usuario['email'],
+    #     "esguia": usuario['esguia'],
+    #     "clave": usuario['clave'],
+    #     "creado": usuario['creado']
+    # }
+    # schema.update({
+    #         "empresa": usuario.get('empresa'),
+    #         "matricula": usuario.get('matricula'),
+    #         "resolucion": usuario.get('resolucion'),
+    #         "cel": usuario.get('cel'),
+    #         "actividad": usuario.get('actividad'),
+    #         "celalt" : usuario.get('celalt')
+    #     })
+    # return schema
 
 #esto lo aprendí después
     # # Agregar campo "celalt" si está presente en el usuario

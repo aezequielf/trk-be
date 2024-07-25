@@ -1,12 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
+from models.mongobase import MongoBaseModel
 
-class Usuario(BaseModel):
-    id: Optional[str] = None
+class Usuario(MongoBaseModel):
     nombre: str
     apellido: str
-    email: str
+    email: EmailStr
     esguia: bool = False
     creado: Optional[datetime] = None   
     empresa: Optional[str] = None
@@ -16,6 +16,11 @@ class Usuario(BaseModel):
     celalt: Optional[str] = None
     actividad: Optional[str] = None 
 
+    # class Config:
+    #     allow_population_by_name = True
+    #     json_encoders = {
+    #         ObjectId: str
+    #     }
 class Usuario_Login(Usuario):
     clave : str
 
