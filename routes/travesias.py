@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, status
-from schemas.travesiaSchema import travesiaSchema, travesiasSchema
 from models.travesias import Travesia
 from db.mongo import list_travesias, nueva_travesia, localiza_trav_id,borra_travesia, lista_trav_guia, actualiza_travesia
 from bson import ObjectId
@@ -19,7 +18,7 @@ async def listar_travesia_guia(id: str):
         ObjectId(id).is_valid
     except:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id incorrecto')
-    travesiasxguia = travesiasSchema(await lista_trav_guia(id))
+    travesiasxguia =  [Travesia(**travesia) for travesia in await lista_trav_guia(id) ]
     return travesiasxguia
 
 @travesia.post('/add')

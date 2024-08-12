@@ -119,7 +119,7 @@ async def localiza_trav_id(id : ObjectId):
     travesia = await c_travesias.find_one({'_id' : id})
     return travesia
 
-async def lista_trav_guia(id : str):
+async def lista_trav_guia(id : ObjectId):
     cursor_travesias = c_travesias.find({'guia_id': id}).sort({'fecha' : 1})
     l_travesias = [travesia async for travesia in cursor_travesias]
     return l_travesias
