@@ -3,6 +3,14 @@ from typing import Optional
 from datetime import datetime
 from models.mongobase import MongoBaseModel
 
+
+class Validacion(BaseModel):
+    email: EmailStr
+    matricula: str
+    resolucion: str
+    actividad: str
+    provincia: str
+
 class Usuario(MongoBaseModel):
     nombre: str
     apellido: str

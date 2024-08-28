@@ -15,6 +15,7 @@ c_opiniones = cnx_motor.tpdb.opiniones
 c_destinos = cnx_motor.tpdb.destinos
 c_detalles = cnx_motor.tpdb.detalles
 c_travesias = cnx_motor.tpdb.travesias
+c_cba_prestadores = cnx_motor.tpdb.cba_prestadores
 
 
 # crud provincias
@@ -70,6 +71,10 @@ async def actualiza_pass_usuario(id: ObjectId, clave: Clave):
 
 async def actualiza_usuario_aguia(id: ObjectId, datosgia: Guia):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(datosgia)})
+    return rta
+
+async def obtener_prestador(email : str):
+    rta = await c_cba_prestadores.find_one({"email": email})
     return rta
 
 # Actualizar opiniones de usuario para guías.

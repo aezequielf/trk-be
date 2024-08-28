@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer #, OAuth2PasswordRequestForm
-from models.usuarios import Usuario, Usuario_Login, Clave, Credenciales, Guia
+from models.usuarios import Usuario, Usuario_Login, Clave, Credenciales, Guia, Validacion
 from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario,\
-actualiza_pass_usuario, un_usuario_mail, actualiza_usuario_aguia
+actualiza_pass_usuario, un_usuario_mail, actualiza_usuario_aguia, obtener_prestador
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from passlib.context import CryptContext
@@ -146,6 +146,21 @@ async def actualizar_guia(id: str, guia: Guia ):
         await actualiza_usuario_aguia(ObjectId(id),guia)
     except: 
         raise HTTPException(500, "No se actualizo nada")
+    return " Datos de usuario actualizado !!!!"
+
+@usuario.put("/{id}/valida_guia", response_model=str, status_code=202)
+async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
+    datos_validar = datos_validar.model_dump()
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(406, "Id inválido")
+    rta = await obtener_prestador(datos_validar["email"])
+    print(rta["nombre"],rta["resolucion"], rta["actividad"])    
+    # try:
+    #     await actualiza_usuario_aguia(ObjectId(id),guia)
+    # except: 
+    #     raise HTTPException(500, "No se actualizo nada")
     return " Datos de usuario actualizado !!!!"
 
 
