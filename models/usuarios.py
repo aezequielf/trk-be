@@ -5,11 +5,10 @@ from models.mongobase import MongoBaseModel
 
 
 class Validacion(BaseModel):
-    email: EmailStr
-    matricula: str
+    email: Optional[EmailStr] = None
     resolucion: str
-    actividad: str
-    provincia: str
+    actividad: Optional[str] = None
+    provincia: str 
 
 class Usuario(MongoBaseModel):
     nombre: str

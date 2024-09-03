@@ -15,7 +15,7 @@ c_opiniones = cnx_motor.tpdb.opiniones
 c_destinos = cnx_motor.tpdb.destinos
 c_detalles = cnx_motor.tpdb.detalles
 c_travesias = cnx_motor.tpdb.travesias
-c_cba_prestadores = cnx_motor.tpdb.cba_prestadores
+c_cba_prestadores = cnx_motor.tpdb.prestadores
 
 
 # crud provincias

@@ -151,12 +151,17 @@ async def actualizar_guia(id: str, guia: Guia ):
 @usuario.put("/{id}/valida_guia", response_model=str, status_code=202)
 async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
     datos_validar = datos_validar.model_dump()
+    print(datos_validar)
     try:
         ObjectId(id).is_valid
     except:
         raise HTTPException(406, "Id inválido")
-    rta = await obtener_prestador(datos_validar["email"])
-    print(rta["nombre"],rta["resolucion"], rta["actividad"])    
+    if datos_validar["email"] == None:
+        #rta = await obtener_prestador(datos_validar["resolucion"])
+        print("obtengo datos por resolucion",datos_validar["resolucion"]," si esta duplicado no valido y pido email")
+        return "probando ando"
+    print("obtengo datos por resolucion",datos_validar["resolucion"]," y por mail",datos_validar["email"])
+    #rta = await obtener_prestador(datos_validar["email"])
     # try:
     #     await actualiza_usuario_aguia(ObjectId(id),guia)
     # except: 
