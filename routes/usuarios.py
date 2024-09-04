@@ -151,22 +151,27 @@ async def actualizar_guia(id: str, guia: Guia ):
 @usuario.put("/{id}/valida_guia", response_model=str, status_code=202)
 async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
     datos_validar = datos_validar.model_dump()
-    print(datos_validar)
     try:
         ObjectId(id).is_valid
     except:
         raise HTTPException(406, "Id inválido")
     if datos_validar["email"] == None:
-        #rta = await obtener_prestador(datos_validar["resolucion"])
-        print("obtengo datos por resolucion",datos_validar["resolucion"]," si esta duplicado no valido y pido email")
-        return "probando ando"
-    print("obtengo datos por resolucion",datos_validar["resolucion"]," y por mail",datos_validar["email"])
-    #rta = await obtener_prestador(datos_validar["email"])
+        rta = await obtener_prestador(datos_validar["resolucion"])
+        if (len(rta) > 1):
+            raise HTTPException(409, "La resolución tiene varios registros, necesitas especificar un correo")
+        return "Prestador válido !"  
+    try:
+        rta = await obtener_prestador(datos_validar["resolucion"],datos_validar["email"])
+    except:
+        raise HTTPException(500, 'Algo salió mal')
+    if (rta == None):
+        raise HTTPException(404, "No se encuentra prestador")
+    
     # try:
     #     await actualiza_usuario_aguia(ObjectId(id),guia)
     # except: 
     #     raise HTTPException(500, "No se actualizo nada")
-    return " Datos de usuario actualizado !!!!"
+    return "Prestador Válido !!"
 
 
 
