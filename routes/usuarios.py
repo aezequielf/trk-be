@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer #, OAuth2PasswordRequestForm
 from models.usuarios import Usuario, Usuario_Login, Clave, Credenciales, Guia, Validacion
 from db.mongo import crea_usuario, lista_usuarios, un_usuario, eliminar_usuario, actualiza_usuario,\
-actualiza_pass_usuario, un_usuario_mail, actualiza_usuario_aguia, obtener_prestador
+actualiza_pass_usuario, un_usuario_mail, actualiza_usuario_aguia, obtener_prestador, marcar_prestador, agrega_validacion_guia
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from passlib.context import CryptContext
@@ -159,6 +159,10 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
         rta = await obtener_prestador(datos_validar["resolucion"])
         if (len(rta) > 1):
             raise HTTPException(409, "La resolución tiene varios registros, necesitas especificar un correo")
+        if "marcado" in rta[0]:
+            raise HTTPException(409, "Prestador ya validado") 
+        await marcar_prestador(rta[0]["_id"])
+        await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"])
         return "Prestador válido !"  
     try:
         rta = await obtener_prestador(datos_validar["resolucion"],datos_validar["email"])
@@ -166,7 +170,10 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
         raise HTTPException(500, 'Algo salió mal')
     if (rta == None):
         raise HTTPException(404, "No se encuentra prestador")
-    
+    if "marcado" in rta:
+        raise HTTPException(409, "Prestador ya validado") 
+    await marcar_prestador(rta["_id"])
+    await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"])
     # try:
     #     await actualiza_usuario_aguia(ObjectId(id),guia)
     # except: 

@@ -73,12 +73,23 @@ async def actualiza_usuario_aguia(id: ObjectId, datosgia: Guia):
     rta = await c_usuarios.find_one_and_update({"_id": id},{"$set": dict(datosgia)})
     return rta
 
+async def agrega_validacion_guia(id: ObjectId, provincia : str):
+    rta = await c_usuarios.find_one({"_id": id})
+    if "validado" in rta and provincia in rta["validado"]:
+        return ""
+    rta = await c_usuarios.find_one_and_update({"_id": id}, {"$push":{ "validado" : provincia }})
+    return rta
+
 async def obtener_prestador(resolucion : str, email : str = None):
     if (email == None):
         cursor = prestadores.find({"resolucion" :  resolucion})
         rta = [prestador async for prestador in cursor]
         return rta 
     rta = await prestadores.find_one({"email": email, "resolucion" : resolucion})
+    return rta
+
+async def marcar_prestador(id : ObjectId):
+    rta = prestadores.update_one({"_id" : id},{ "$set" : {"marcado" : True}})
     return rta
 
 # Actualizar opiniones de usuario para guías.
