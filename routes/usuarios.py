@@ -157,6 +157,8 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
         raise HTTPException(406, "Id inválido")
     if datos_validar["email"] == None:
         rta = await obtener_prestador(datos_validar["resolucion"])
+        if (len(rta) == 0):
+            raise HTTPException(404, "No se encuentra prestador")
         if (len(rta) > 1):
             raise HTTPException(409, "La resolución tiene varios registros, necesitas especificar un correo")
         if "marcado" in rta[0]:

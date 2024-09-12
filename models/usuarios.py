@@ -7,7 +7,6 @@ from models.mongobase import MongoBaseModel
 class Validacion(BaseModel):
     email: Optional[EmailStr] = None
     resolucion: str
-    actividad: Optional[str] = None
     provincia: str 
 
 class Usuario(MongoBaseModel):
@@ -41,11 +40,10 @@ class Credenciales(BaseModel):
 class Guia(BaseModel):
     esguia : Optional[bool] = None
     empresa: str
-    matricula: str
     resolucion: str
     cel: str
     celalt: str
-    actividad: str
+
 
 
 

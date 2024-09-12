@@ -74,10 +74,11 @@ async def actualiza_usuario_aguia(id: ObjectId, datosgia: Guia):
     return rta
 
 async def agrega_validacion_guia(id: ObjectId, provincia : str):
+    token = str(id)[:9]+"5413d4f"
     rta = await c_usuarios.find_one({"_id": id})
     if "validado" in rta and provincia in rta["validado"]:
         return ""
-    rta = await c_usuarios.find_one_and_update({"_id": id}, {"$push":{ "validado" : provincia }})
+    rta = await c_usuarios.find_one_and_update({"_id": id}, {"$push": {"validacion" : { "provincia" : provincia , "token" : token, "validado": False }}})
     return rta
 
 async def obtener_prestador(resolucion : str, email : str = None):
