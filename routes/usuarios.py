@@ -155,17 +155,6 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
         ObjectId(id).is_valid
     except:
         raise HTTPException(406, "Id inválido")
-    if datos_validar["email"] == None:
-        rta = await obtener_prestador(datos_validar["resolucion"])
-        if (len(rta) == 0):
-            raise HTTPException(404, "No se encuentra prestador")
-        if (len(rta) > 1):
-            raise HTTPException(409, "La resolución tiene varios registros, necesitas especificar un correo")
-        if "marcado" in rta[0]:
-            raise HTTPException(409, "Prestador ya validado") 
-        await marcar_prestador(rta[0]["_id"])
-        await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"])
-        return "Prestador válido !"  
     try:
         rta = await obtener_prestador(datos_validar["resolucion"],datos_validar["email"])
     except:
@@ -173,7 +162,7 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
     if (rta == None):
         raise HTTPException(404, "No se encuentra prestador")
     if "marcado" in rta:
-        raise HTTPException(409, "Prestador ya validado") 
+        raise HTTPException(409, "Esta resolución ya está validando un Guía registrado") 
     await marcar_prestador(rta["_id"])
     await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"])
     # try:

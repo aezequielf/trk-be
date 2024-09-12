@@ -5,7 +5,7 @@ from models.mongobase import MongoBaseModel
 
 
 class Validacion(BaseModel):
-    email: Optional[EmailStr] = None
+    email: EmailStr
     resolucion: str
     provincia: str 
 
