@@ -16,11 +16,10 @@ class Usuario(MongoBaseModel):
     esguia: bool = False
     creado: Optional[datetime] = None   
     empresa: Optional[str] = None
-    matricula: Optional[str] = None
-    resolucion: Optional[str] = None
     cel: Optional[str] = None
     celalt: Optional[str] = None
-    actividad: Optional[str] = None 
+    validacion: Optional[list[dict]] = None
+
 
     # class Config:
     #     allow_population_by_name = True

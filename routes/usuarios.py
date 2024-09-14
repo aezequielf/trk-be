@@ -164,7 +164,7 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
     if "marcado" in rta:
         raise HTTPException(409, "Esta resolución ya está validando un Guía registrado") 
     await marcar_prestador(rta["_id"])
-    await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"])
+    await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"], datos_validar["resolucion"])
     # try:
     #     await actualiza_usuario_aguia(ObjectId(id),guia)
     # except: 
