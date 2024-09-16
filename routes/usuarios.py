@@ -148,7 +148,7 @@ async def actualizar_guia(id: str, guia: Guia ):
         raise HTTPException(500, "No se actualizo nada")
     return " Datos de usuario actualizado !!!!"
 
-@usuario.put("/{id}/valida_guia", response_model=str, status_code=202)
+@usuario.put("/{id}/valida_guia", response_model=dict, status_code=202)
 async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
     datos_validar = datos_validar.model_dump()
     try:
@@ -164,12 +164,15 @@ async def actualizar_guia_valido(id: str, datos_validar: Validacion ):
     if "marcado" in rta:
         raise HTTPException(409, "Esta resolución ya está validando un Guía registrado") 
     await marcar_prestador(rta["_id"])
-    await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"], datos_validar["resolucion"])
+    rta2 = await agrega_validacion_guia(ObjectId(id), datos_validar["provincia"], datos_validar["resolucion"])
+    if (rta2 == None):
+        raise HTTPException(409, "Guía validado en esa provincia")
     # try:
     #     await actualiza_usuario_aguia(ObjectId(id),guia)
     # except: 
     #     raise HTTPException(500, "No se actualizo nada")
-    return "Prestador Válido !!"
+ #   print(rta2)
+    return rta2
 
 
 

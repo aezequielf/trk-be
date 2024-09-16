@@ -6,6 +6,7 @@ from models.opiniones import Opinion
 from models.destinos import Destino, DetallesDestino
 from models.travesias import Travesia
 from datetime import datetime
+import random
 
 cnx_motor = AsyncIOMotorClient('localhost',27017)
 
@@ -74,12 +75,17 @@ async def actualiza_usuario_aguia(id: ObjectId, datosgia: Guia):
     return rta
 
 async def agrega_validacion_guia(id: ObjectId, provincia : str, resolucion : str):
-    token = str(id)[:9]+"5413d4f"
+    # genero numero aleatorios
+    num = ''
+    for a in [str(random.randint(0,9)) for _ in range(5)]:
+        num += a
+    token = str(id)[:9]+'f'+num
     rta = await c_usuarios.find_one({"_id": id})
-    if "validado" in rta and provincia in rta["validado"]:
-        return ""
-    rta = await c_usuarios.find_one_and_update({"_id": id}, {"$push": {"validacion" : { "provincia" : provincia , "token" : token, "resolucion": resolucion, "validado": False }}})
-    return rta
+    if "validacion" in rta and provincia in [valid["provincia"] for valid in rta["validacion"]]:
+        return None
+    datos_validar =  { "provincia" : provincia , "token" : token, "resolucion": resolucion, "validado": False }
+    await c_usuarios.find_one_and_update({"_id": id}, {"$push": {"validacion" : datos_validar}})
+    return datos_validar
 
 async def obtener_prestador(resolucion : str, email : str = None):
     if (email == None):
