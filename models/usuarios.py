@@ -39,7 +39,6 @@ class Credenciales(BaseModel):
 class Guia(BaseModel):
     esguia : Optional[bool] = None
     empresa: str
-    resolucion: str
     cel: str
     celalt: str
 
