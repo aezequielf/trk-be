@@ -1,9 +1,10 @@
+import re
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
-from models.pcias import Pcia
+from models.pcias import Pcia, Destino
 from models.usuarios import Usuario, Usuario_Login,Clave, Guia
 from models.opiniones import Opinion
-from models.destinos import Destino, DetallesDestino
+from models.destinos import  DetallesDestino
 from models.travesias import Travesia
 from datetime import datetime
 import random
@@ -25,12 +26,12 @@ async def crea_prov(pcia: Pcia):
     return rta.inserted_id
 
 async def lista_pcias():
-    cursor = c_pcias.find({}).sort("nombre",1)
-    l_pcias = [una_prov async for una_prov in cursor]
+    cursor = c_pcias.find({},{'destinos' : 0}).sort("nombre",1)
+    l_pcias = [Pcia(**una_prov) async for una_prov in cursor]
     return l_pcias
 
 async def una_pcia(id: ObjectId):
-    pcia = await c_pcias.find_one({"_id": id})
+    pcia = await c_pcias.find_one({"_id": id},{'destinos': 0})
     return pcia
 
 async def eliminar_pcia(id: ObjectId):
@@ -115,19 +116,55 @@ async def obtener_opinion_id(id : ObjectId):
     return rta
 
 # crud recorridos/ travesías
+#Destinos dentro de la coleccion provincias
 
+# esta está obsoleta
 async def nuevo_destino(destino : Destino):
     rta = await c_destinos.insert_one(destino)
     return rta.inserted_id
 
-async def lista_destinos():
-    cursor = c_destinos.find({})
-    l_destinos = [un_destino async for un_destino in cursor]
+
+async def lista_destinos(criterio : str = None):
+
+    agregacion = [
+        {
+            '$unwind': {
+                'path': '$destinos'
+            }
+        }, {
+            '$match': {
+                'destinos.lugar': criterio
+
+            }
+        }
+    ]
+
+    if(criterio == None):
+        agregacion = [
+            {
+                '$unwind': {
+                    'path': '$destinos'
+                }
+            }
+        ]
+    cursor = c_pcias.aggregate(agregacion)
+    l_destinos = [Pcia(**destino) async for destino in cursor]
     return l_destinos
 
-async def lista_destinos_pcia(pcia_id : str):
-    cursor = c_destinos.find({"pcia_id" : pcia_id})
-    l_destinos = [un_destino async for un_destino in cursor]
+async def lista_destinos_pcia(pcia_id : ObjectId):
+    agregacion = [
+        {
+            '$match': {
+                '_id': pcia_id
+            }
+        }, {
+            '$unwind': {
+                'path': '$destinos'
+            }
+        }
+    ]
+    cursor = c_pcias.aggregate(agregacion)
+    l_destinos = [Pcia(**destino) async for destino in cursor]
     return l_destinos
 
 # cambiamos detalles por travesias que es su nombre correcto

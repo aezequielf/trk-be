@@ -9,8 +9,7 @@ pcia = APIRouter()
 
 @pcia.get("/", response_model=list[Pcia], status_code=200)
 async def lista_de_pcias():
-    listado = [Pcia(**pcia) for pcia in await lista_pcias()]
-    return listado
+    return await lista_pcias()
 
 @pcia.get("/{id}", response_model=Pcia, status_code=200)
 async def lista_una_prov(id: str):

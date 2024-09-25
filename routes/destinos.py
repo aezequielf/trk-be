@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from schemas.destinoSchema import destinoSchema, destinosSchema, detalleSchema, detallesSchema
 from models.destinos import Destino, DetallesDestino
+from models.pcias import Pcia
 from db.mongo import nuevo_destino, lista_destinos, lista_destinos_pcia, nuevo_detalle,lista_destinos_pcia_fecha, lista_dest_pcia_desde_hoy, lista_detalle_destinos, destino_id
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -15,16 +16,25 @@ async def agrega_destino( destino : Destino):
     rta = await nuevo_destino(destino)
     return "Destino Creado Correctamente: "+str(rta)
 
-@destino.get('/', response_model=list[Destino], status_code=200)
+@destino.get('/', response_model=list[Pcia], status_code=200)
 async def listado_destinos():
-    return destinosSchema( await lista_destinos())
+    return await lista_destinos()
 
-@destino.get('/pcia/{id}',response_model=list[Destino], status_code=200)
+
+
+@destino.get('/pcia/{id}',response_model=list[Pcia], status_code=200)
 async def listado_destinos_pcias(id: str):
     try:
-        return destinosSchema( await lista_destinos_pcia(id))
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id invalido')
+    try:
+        return await lista_destinos_pcia(ObjectId(id))
     except:
         return []
+
+# Todo
+
 
 @destino.get('/pcia/{id}/todas',response_model=list[dict], status_code=200)
 async def listado_destinos_pcias_desde_hoy(id: str):
