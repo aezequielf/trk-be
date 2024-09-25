@@ -20,6 +20,9 @@ async def agrega_destino( destino : Destino):
 async def listado_destinos():
     return await lista_destinos()
 
+@destino.get('/{busqueda}', response_model=list[Pcia], status_code=200)
+async def listado_destinos(busqueda : str):
+    return await lista_destinos(busqueda)
 
 
 @destino.get('/pcia/{id}',response_model=list[Pcia], status_code=200)

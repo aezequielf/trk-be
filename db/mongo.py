@@ -1,4 +1,3 @@
-import re
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson.objectid import ObjectId
 from models.pcias import Pcia, Destino
@@ -125,29 +124,31 @@ async def nuevo_destino(destino : Destino):
 
 
 async def lista_destinos(criterio : str = None):
-
-    agregacion = [
+    pipe = [
         {
             '$unwind': {
                 'path': '$destinos'
             }
         }, {
             '$match': {
-                'destinos.lugar': criterio
+                'destinos.lugar': {
+                    '$regex' : criterio,
+                    '$options' : 'i'
+                }
 
             }
         }
     ]
 
     if(criterio == None):
-        agregacion = [
+        pipe = [
             {
                 '$unwind': {
                     'path': '$destinos'
                 }
             }
         ]
-    cursor = c_pcias.aggregate(agregacion)
+    cursor = c_pcias.aggregate(pipe)
     l_destinos = [Pcia(**destino) async for destino in cursor]
     return l_destinos
 
