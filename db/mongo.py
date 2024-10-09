@@ -118,9 +118,10 @@ async def obtener_opinion_id(id : ObjectId):
 #Destinos dentro de la coleccion provincias
 
 # esta está obsoleta
-async def nuevo_destino(destino : Destino):
-    rta = await c_destinos.insert_one(destino)
-    return rta.inserted_id
+async def nuevo_destino(id: ObjectId, destino : Destino):
+    destino['id'] = str(ObjectId())
+    rta = await c_pcias.find_one_and_update({'_id': id},{ '$push': {'destinos' : destino }})
+    return rta
 
 
 async def lista_destinos(criterio : str = None):
@@ -161,6 +162,10 @@ async def lista_destinos_pcia(pcia_id : ObjectId):
         }, {
             '$unwind': {
                 'path': '$destinos'
+            }
+        }, {
+            '$sort': {
+                "destinos.lugar": 1
             }
         }
     ]
