@@ -175,9 +175,9 @@ async def lista_destinos_pcia(pcia_id : ObjectId):
 
 # cambiamos detalles por travesias que es su nombre correcto
 
-async def nuevo_detalle( detalle : DetallesDestino):
-    rta = await c_detalles.insert_one(detalle)
-    return rta.inserted_id
+# async def nuevo_detalle( detalle : DetallesDestino):
+#     rta = await c_detalles.insert_one(detalle)
+#     return rta.inserted_id
 
 async def nueva_travesia(travesia : Travesia):
     rta = await c_travesias.insert_one(travesia)
@@ -208,76 +208,87 @@ async def borra_travesia(id: ObjectId):
     return rta
 
 
-async def lista_destinos_pcia_fecha(pcia_id : str, fecha: datetime = None):
-    if fecha==None:
-        fecha_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        pipeline = [
-            {
-                '$match': {
-                    'fecha': {
-                        '$gte': fecha_hoy
-                    },
-                'pcia_id': pcia_id
+# async def lista_travesias_pcia_fecha(pcia_id : str, fecha: datetime = None):
+#     if fecha==None:
+#         fecha_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+#         pipeline = [
+#             {
+#                 '$match': {
+#                     'fecha': {
+#                         '$gte': fecha_hoy
+#                     },
+#                 'pcia_id': pcia_id
                     
-                }
-            }, {
-                '$group': {
-                    '_id': {
-                        '$dateToString': {
-                            'format': '%Y-%m-%d', 
-                            'date': '$fecha'
-                        }
-                    }
-                }
-            }, {
-                '$sort': {
-                    'fecha': 1
-                }
-            }
-        ]
+#                 }
+#             }, {
+#                 '$group': {
+#                     '_id': {
+#                         '$dateToString': {
+#                             'format': '%Y-%m-%d', 
+#                             'date': '$fecha'
+#                         }
+#                     }
+#                 }
+#             }, {
+#                 '$sort': {
+#                     'fecha': 1
+#                 }
+#             }
+#         ]
 
-        l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
-        return l_detalles
+#         l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
+#         return l_detalles
 
-    pipeline = [
-            {
-                '$match': {
-                    'pcia_id': pcia_id,
-                    'fecha': { "$eq" :fecha}
-                }
-            },
-            {
-                '$group': { "_id" :"$lugar" ,
-                           "destino_id" : {"$first" : "$destino_id"} }
-            },
-            {
-                '$sort': {
-               "lugar": 1  }
-            }
-        ]
-    l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
-    return l_detalles
+#     pipeline = [
+#             {
+#                 '$match': {
+#                     'pcia_id': pcia_id,
+#                     'fecha': { "$eq" :fecha}
+#                 }
+#             },
+#             {
+#                 '$group': { "_id" :"$lugar" ,
+#                            "destino_id" : {"$first" : "$destino_id"} }
+#             },
+#             {
+#                 '$sort': {
+#                "lugar": 1  }
+#             }
+#         ]
+#     l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
+#     return l_detalles
 
-async def lista_dest_pcia_desde_hoy(pcia_id : str):
+async def lista_travesias_pcia_desde_hoy(pcia_id : str):
     fecha = datetime.today()
     pipeline = [
-            {
-                '$match': {
-                    'pcia_id': pcia_id,
-                    'fecha': { "$gte" :fecha}
-                }
-            },
-            {
-                '$group': { "_id" :"$lugar" ,
-                           "destino_id" : {"$first" : "$destino_id"} }
-            },
-            {
-                '$sort': {
-               "_id": 1  }
+    {
+        '$match': {
+            'pcia_id': pcia_id, 
+            'fecha': {
+                '$gte': fecha
             }
-        ]
-    l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
-    return l_detalles
+        }
+    }, {
+        '$group': {
+            '_id': '$lugar', 
+            'destino_id': {
+                '$first': '$destino_id'
+            }
+        }
+    }, {
+        '$sort': {
+            '_id': 1
+        }
+    }, {
+        '$project': {
+            'lugar': '$_id', 
+            '_id': 0, 
+            'destino_id': 1
+        }
+    }
+    ]
+    l_destinos = [un_destino async for un_destino in c_travesias.aggregate(pipeline)]
+    return l_destinos
 
 async def destino_id(id: ObjectId):
     return await c_destinos.find_one({'_id': id})
