@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from models.travesias import Travesia
-from db.mongo import list_travesias, nueva_travesia, localiza_trav_id,borra_travesia, lista_trav_guia, actualiza_travesia, lista_travesias_pcia_desde_hoy
+from db.mongo import list_travesias, nueva_travesia, localiza_trav_id,borra_travesia, lista_trav_guia, actualiza_travesia, lista_travesias_pcia_desde_hoy,lista_travesias_pcia_fecha, lista_travesias_destinos
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -65,44 +65,49 @@ async def act_travesia(travesia: Travesia):
 async def listado_destinos_pcias_desde_hoy(id: str):
     try:
         return await lista_travesias_pcia_desde_hoy(id)
-        # return destinosSchema( await lista_dest_pcia_desde_hoy(id))
     except:
         print('esta') 
         return []
 
 
-# @travesia.get('/pcia/{id}/fechas', response_model=list[dict],status_code=200)
-# async def listado_travesias_pcias_fecha(id: str):
-#     try:
-#         return  await lista_travesias_pcia_fecha(id)
-#     except:
-#         return []
+@travesia.get('/pcia/{id}/fechas', response_model=list[dict],status_code=200)
+async def listado_travesias_pcia_fecha(id: str):
+    try:
+        return  await lista_travesias_pcia_fecha(id)
+    except:
+        return []
     
 
 
-# @travesia.get('/pcia/{id}/{fecha}', response_model=list[dict],status_code=200)
-# async def listado_destinos_pcias_fecha(id: str, fecha: str):
-#     try:
-#         fecha = datetime.fromisoformat(fecha)
-#     except:
-#         raise HTTPException(406, "Fecha mal formada o inesperada")
-#     try:
-#         return  await lista_travesias_pcia_fecha(id, fecha)
-#     except:
-#         return []
+@travesia.get('/pcia/{id}/{fecha}', response_model=list[dict],status_code=200)
+async def listado_travesias_pcias_fecha(id: str, fecha: str):
+    try:
+        fecha = datetime.fromisoformat(fecha)
+    except:
+        raise HTTPException(406, "Fecha mal formada o inesperada")
+    try:
+        return  await lista_travesias_pcia_fecha(id, fecha) 
+    except:
+        return []
     
-# @travesia.get('/{id}')
-# async def traer_destino(id: str):
-#     try:
-#         ObjectId(id).is_valid
-#     except:
-#         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id invalido')
-#     return destinoSchema(await destino_id(ObjectId(id)))
+@travesia.get('/{id}')
+async def traer_travesia(id: str):
+    try:
+        ObjectId(id).is_valid
+    except:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Id invalido')
+    una_travesia= await localiza_trav_id(ObjectId(id))
+    if (una_travesia):
+        return Travesia(** await localiza_trav_id(ObjectId(id)))
+    else:
+        return {}
 
-# @travesia.get('/lista/{id_destino}', response_model=list[DetallesDestino], status_code=200)
-# async def listado_destinos_detas(id_destino :str):
-#     try:
-#         return detallesSchema(await lista_detalle_destinos(id_destino))
-#     except:
-#         raise HTTPException(406, "Algo salio mal")
+@travesia.get('/lista/{id_destino}', response_model=list, status_code=200)
+async def listado_travesias_por_dest(id_destino :str):
+    l_travesias = [Travesia(** travesia) for travesia in await lista_travesias_destinos(id_destino)] 
+    try:
+        l_travesias = [Travesia(** travesia) for travesia in await lista_travesias_destinos(id_destino)]  
+    except:
+        raise HTTPException(406, "Algo salio mal")
+    return l_travesias
     

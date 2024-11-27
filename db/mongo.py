@@ -208,55 +208,62 @@ async def borra_travesia(id: ObjectId):
     return rta
 
 
-# async def lista_travesias_pcia_fecha(pcia_id : str, fecha: datetime = None):
-#     if fecha==None:
-#         fecha_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-#         pipeline = [
-#             {
-#                 '$match': {
-#                     'fecha': {
-#                         '$gte': fecha_hoy
-#                     },
-#                 'pcia_id': pcia_id
+async def lista_travesias_pcia_fecha(pcia_id : str, fecha: datetime = None):
+    if fecha==None:
+        fecha_hoy = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        pipeline = [
+            {
+                '$match': {
+                    'fecha': {
+                        '$gte': fecha_hoy
+                    },
+                'pcia_id': pcia_id
                     
-#                 }
-#             }, {
-#                 '$group': {
-#                     '_id': {
-#                         '$dateToString': {
-#                             'format': '%Y-%m-%d', 
-#                             'date': '$fecha'
-#                         }
-#                     }
-#                 }
-#             }, {
-#                 '$sort': {
-#                     'fecha': 1
-#                 }
-#             }
-#         ]
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        '$dateToString': {
+                            'format': '%Y-%m-%d', 
+                            'date': '$fecha'
+                        }
+                    }
+                }
+            }, {
+                '$sort': {
+                    'fecha': 1
+                }
+            }
+        ]
 
-#         l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
-#         return l_detalles
+        l_travesias = [una_travesia async for una_travesia in c_travesias.aggregate(pipeline)]
+        return l_travesias
 
-#     pipeline = [
-#             {
-#                 '$match': {
-#                     'pcia_id': pcia_id,
-#                     'fecha': { "$eq" :fecha}
-#                 }
-#             },
-#             {
-#                 '$group': { "_id" :"$lugar" ,
-#                            "destino_id" : {"$first" : "$destino_id"} }
-#             },
-#             {
-#                 '$sort': {
-#                "lugar": 1  }
-#             }
-#         ]
-#     l_detalles = [un_detalle async for un_detalle in c_detalles.aggregate(pipeline)]
-#     return l_detalles
+    pipeline = [
+            {
+                '$match': {
+                    'pcia_id': pcia_id,
+                    'fecha': { "$eq" :fecha}
+                }
+            },
+            {
+                '$group': { "_id" :"$lugar" ,
+                           "destino_id" : {"$first" : "$destino_id"} }
+            },
+            {
+                '$sort': {
+               "lugar": 1  }
+            },
+            {
+                '$project': {
+                    'lugar': '$_id',
+                    '_id': 0,
+                    'destino_id': 1
+                }
+            }
+        ]
+    l_travesias = [una_travesia async for una_travesia in c_travesias.aggregate(pipeline)]
+    return l_travesias
 
 async def lista_travesias_pcia_desde_hoy(pcia_id : str):
     fecha = datetime.today()
@@ -290,10 +297,8 @@ async def lista_travesias_pcia_desde_hoy(pcia_id : str):
     l_destinos = [un_destino async for un_destino in c_travesias.aggregate(pipeline)]
     return l_destinos
 
-async def destino_id(id: ObjectId):
-    return await c_destinos.find_one({'_id': id})
     
-async def lista_detalle_destinos(destino_id : str):
+async def lista_travesias_destinos(destino_id : str):
     fecha = datetime.today()
-    l_detalles = [un_detalle async for un_detalle in c_detalles.find({"destino_id" : destino_id, "fecha" : { "$gte" : fecha}}).sort({ "fecha" : 1})] 
-    return l_detalles
+    l_travesias = [una_travesia async for una_travesia in c_travesias.find({"destino_id" : destino_id, "fecha" : { "$gte" : fecha}}).sort({ "fecha" : 1})] 
+    return l_travesias
