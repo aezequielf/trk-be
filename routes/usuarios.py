@@ -64,7 +64,7 @@ async def login_user(form: Credenciales):
             "sub" : usuario["id"],
             "exp": expire,
         }
-        return {"token": jwt.encode(token, SECRET, algorithm=ALGENC ) , "type": "bearer"}
+        return {"token": jwt.encode(token, SECRET, algorithm=ALGENC ) , "type": "bearer", "exp": expire}
     raise HTTPException(404, 'Combinacion usuario y claves incorrecto')
     
 
